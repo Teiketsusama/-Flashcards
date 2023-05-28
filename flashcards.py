@@ -1,5 +1,6 @@
 import random
 from io import StringIO
+import argparse
 
 cards = {}
 for key, value in cards.items():
@@ -141,6 +142,16 @@ def reset_stats():
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--import_from", help="import cards from file")
+    parser.add_argument("--export_to", help="export cards to file")
+    args = parser.parse_args()
+    if args.import_from:
+        with open(args.import_from, "r") as file:
+            for line in file:
+                term, definition, errors = line.strip().split(";")
+                cards[term] = {"definition": definition, "errors": int(errors)}
+        print(f"{len(cards)} cards have been loaded.")
     while True:
         user_input = input("Input the action (add, remove, import, export, ask, exit, "
                            "log, hardest card, reset stats): \n")
@@ -158,6 +169,11 @@ def main():
             ask_cards()
         elif user_input == "exit":
             print("Bye bye!")
+            if args.export_to:
+                with open(args.export_to, "w") as file:
+                    for term, card in cards.items():
+                        file.write(f"{term};{card['definition']};{card['errors']}\n")
+                print(f"{len(cards)} cards have been saved.")
             exit()
         elif user_input == "log":
             save_log()
